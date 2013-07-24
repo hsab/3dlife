@@ -10,6 +10,7 @@
 # as are the top and bottom. Each pixel is an area, and the surface is a toroid. 
 
 import pygame
+import sys #For quit
 import copy
 import random
 from pprint import pprint
@@ -135,6 +136,13 @@ def render(surface, colorMap):
     #Do the update
     pygame.display.flip()
     del asArray
+
+    # Handle the user attempting to quit
+    for event in pygame.event.get(): # User did something
+        if event.type == pygame.QUIT: # If user clicked close
+            #Shutdown pygame and bail. 
+            pygame.quit()
+            sys.exit()
 
                          
 #Generate the adjacency map
