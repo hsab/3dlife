@@ -102,7 +102,31 @@ def ccaRule(currentColor, neighborVals):
     if count > thresh:
         nextVal = nextColor
     return nextVal
-      
+
+#Implement the typical game of life
+#This assumes that the matrix only has two colors, 1 and 0, and that 1 
+#is "alive" and 0 is "dead.
+def conwayRule(currentColor, neighborVals):
+    #This ends up flattening the array to ones or zeros in one generation
+    count =   sum([1 if c == 1 else 0 for c in neighborVals])      
+    
+    nextVal = 0
+    #Conway's game of life, as per wikipedia
+    #Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+    if currentColor == 1 and count < 2:
+        nextVal = 0
+    #Any live cell with two or three live neighbours lives on to the next generation.
+    if currentColor == 1 and (count == 2 or count == 3):
+        nextVal = 1
+    #Any live cell with more than three live neighbours dies, as if by overcrowding.
+    if currentColor == 1 and count > 3:
+        nextVal = 0
+    #Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction
+    if currentColor == 0 and count == 3:
+        nextVal = 1
+        
+    return nextVal
+          
 def render(surface, colorMap):
     #Get the array of the surface:
     asArray = pygame.PixelArray(surface)
@@ -130,7 +154,8 @@ iteration = 0
 while iteration < maxIter:
     print "Iteration: {0}".format(iteration)
     #colorMap = update(spaceMap, colorMap, ccaRule)  
-    colorMap = update(spaceMap, colorMap, ghRule)
+    #colorMap = update(spaceMap, colorMap, ghRule)
+    colorMap = update(spaceMap, colorMap, conwayRule)
     
     render(surface, colorMap)
     iteration += 1
