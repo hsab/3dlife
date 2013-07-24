@@ -65,11 +65,26 @@ def update(adjMap, cellValues, updateRule):
         
     return newCellValues
 
+def render(surface, colorMap):
+    #Get the array of the surface:
+    asArray = pygame.PixelArray(surface)
+    for point in colorMap.keys():
+        asArray[point[0], point[1]] = colorIndex[colorMap[point]]
+    #Do the update
+    pygame.display.flip()
+    del asArray
+
+    # Handle the user attempting to quit
+    for event in pygame.event.get(): # User did something
+        if event.type == pygame.QUIT: # If user clicked close
+            #Shutdown pygame and bail. 
+            pygame.quit()
+            sys.exit()
+
 #Attempt at Greenberg-Hastings:
 # On update, if cell is zero and there are more than threshold 1 cells in 
 # the neighborhood, transition to one. 
 # All other values trainstion by one automatically, until they wrap to zero. 
-
 def ghRule(currentColor, neighborVals):
     thresh = 1
     
@@ -109,7 +124,7 @@ def ccaRule(currentColor, neighborVals):
 #is "alive" and 0 is "dead.
 def conwayRule(currentColor, neighborVals):
     #This ends up flattening the array to ones or zeros in one generation
-    count =   sum([1 if c == 1 else 0 for c in neighborVals])      
+    count = sum([1 if c == 1 else 0 for c in neighborVals])      
     
     nextVal = 0
     #Conway's game of life, as per wikipedia
@@ -127,28 +142,28 @@ def conwayRule(currentColor, neighborVals):
         nextVal = 1
         
     return nextVal
-          
-def render(surface, colorMap):
-    #Get the array of the surface:
-    asArray = pygame.PixelArray(surface)
-    for point in colorMap.keys():
-        asArray[point[0], point[1]] = colorIndex[colorMap[point]]
-    #Do the update
-    pygame.display.flip()
-    del asArray
 
-    # Handle the user attempting to quit
-    for event in pygame.event.get(): # User did something
-        if event.type == pygame.QUIT: # If user clicked close
-            #Shutdown pygame and bail. 
-            pygame.quit()
-            sys.exit()
-
+#Given two lists of numbers, generate a rule for the Game of Life that 
+# 1. makes a cell live if the number of its neighbors is in "born"
+# 2. makes a cell die if the number of its neighbors is in "die"
+# 3. makes a cell not change otherwise
+# Standard Conway Life is lifeGen([3],[0,1,4,5,6,7,8])
+def lifeGen(born, die):
+    def lifeRule(cVal, nVals):
+        count = sum([1 if c == 1 else 0 for c in nVals])
+        if (cVal == 0) and (count in born):
+            return 1
+        elif (cVal == 1) and (count in die):
+            return 0
+        else:
+            return cVal
+    return lifeRule
                          
 #Generate the adjacency map
 spaceMap = genAdjMap(sizeX,sizeY)
 
 #Generate the cell color map
+colors = 2
 colorMap = {}
 for key in spaceMap.keys():
     colorMap[key] = random.choice(range(0,colors))
@@ -163,8 +178,11 @@ while iteration < maxIter:
     print "Iteration: {0}".format(iteration)
     #colorMap = update(spaceMap, colorMap, ccaRule)  
     #colorMap = update(spaceMap, colorMap, ghRule)
-    colorMap = update(spaceMap, colorMap, conwayRule)
-    
+    #colorMap = update(spaceMap, colorMap, conwayRule)
+    #Typical Conway life
+    #colorMap = update(spaceMap, colorMap, lifeGen([3],[0,1,4,5,6,7,8]))
+    #HighLife
+    colorMap = update(spaceMap, colorMap, lifeGen([3,6],[0,1,4,5,7,8]))
     render(surface, colorMap)
     iteration += 1
     
